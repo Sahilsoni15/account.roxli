@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+firebase-key.json
+*firebase-adminsdk*.json
+.env
+.DS_Store

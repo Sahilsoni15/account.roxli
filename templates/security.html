@@ -1,0 +1,969 @@
+{% extends "base.html" %}
+
+{% block title %}Security - Account{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-nav">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <div class="header-content">
+            <h1>Security</h1>
+            <p>Settings and recommendations to help keep your account secure</p>
+        </div>
+    </div>
+</div>
+
+<div class="security-sections">
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h3>Signing in to Roxli</h3>
+                <p>Make sure you can always access your Roxli Account</p>
+            </div>
+        </div>
+        
+        <div class="security-grid">
+            <div class="security-card">
+                <div class="security-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="security-content">
+                    <h4>Password</h4>
+                    <p>Strong password protects your account</p>
+                    <span class="security-status warning">Last changed: Never</span>
+                </div>
+                <button class="security-btn" onclick="changePassword()">
+                    <i class="fas fa-edit"></i>
+                    Change
+                </button>
+            </div>
+            
+            <div class="security-card">
+                <div class="security-icon {{ 'success' if user and user.twofaEnabled else 'warning' }}">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="security-content">
+                    <h4>2-Step Verification</h4>
+                    <p>{{ 'Extra security for your account' if user and user.twofaEnabled else 'Add an extra layer of security' }}</p>
+                    <span class="security-status {{ 'success' if user and user.twofaEnabled else 'warning' }}">{{ 'Enabled' if user and user.twofaEnabled else 'Not enabled' }}</span>
+                </div>
+                <button class="security-btn {{ 'primary' if not (user and user.twofaEnabled) else '' }}" onclick="{{ 'disable2FA()' if user and user.twofaEnabled else 'setup2FA()' }}">
+                    <i class="fas fa-{{ 'times' if user and user.twofaEnabled else 'plus' }}"></i>
+                    {{ 'Disable' if user and user.twofaEnabled else 'Enable' }}
+                </button>
+            </div>
+            
+            <div class="security-card">
+                <div class="security-icon {{ 'success' if user and user.recoveryEmail else 'warning' }}">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="security-content">
+                    <h4>Recovery Email</h4>
+                    <p>{{ user.recoveryEmail if user and user.recoveryEmail else 'Add a recovery email' }}</p>
+                    <span class="security-status {{ 'success' if user and user.recoveryEmail else 'warning' }}">{{ 'Verified' if user and user.recoveryEmail else 'Not added' }}</span>
+                </div>
+                <button class="security-btn" onclick="editRecoveryEmail()">
+                    <i class="fas fa-{{ 'edit' if user and user.recoveryEmail else 'plus' }}"></i>
+                    {{ 'Edit' if user and user.recoveryEmail else 'Add' }}
+                </button>
+            </div>
+            
+            <div class="security-card">
+                <div class="security-icon {{ 'success' if user and user.recoveryPhone else 'warning' }}">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div class="security-content">
+                    <h4>Recovery Phone</h4>
+                    <p>{{ user.recoveryPhone if user and user.recoveryPhone else 'Add a recovery phone' }}</p>
+                    <span class="security-status {{ 'success' if user and user.recoveryPhone else 'warning' }}">{{ 'Verified' if user and user.recoveryPhone else 'Not added' }}</span>
+                </div>
+                <button class="security-btn" onclick="editRecoveryPhone()">
+                    <i class="fas fa-{{ 'edit' if user and user.recoveryPhone else 'plus' }}"></i>
+                    {{ 'Edit' if user and user.recoveryPhone else 'Add' }}
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Recent security activity</h3>
+        <p>Review your recent security events</p>
+        
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="activity-info">
+                    <h4>Sign-in</h4>
+                    <p>Today • {{ user.email if user else 'johndoe@example.com' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Your devices</h3>
+        <p>Devices where you're currently signed in</p>
+        
+        <div class="device-list" id="deviceList">
+            <div class="loading">Loading devices...</div>
+        </div>
+        
+        <button class="btn-secondary" onclick="window.location.href='/devices'">
+            Manage all devices
+        </button>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Change password</h3>
+            <button class="close-btn" onclick="closeModal('passwordModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Current password</label>
+                <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-group">
+                <label>New password</label>
+                <input type="password" id="newPassword" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm new password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('passwordModal')">Cancel</button>
+            <button class="btn-primary" onclick="savePassword()">Change password</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2FA Setup Modal -->
+<div class="modal" id="twofaModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Set up 2-Step Verification</h3>
+            <button class="close-btn" onclick="closeModal('twofaModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="twofaModalBody">
+            <div id="twofaStep1">
+                <p>Scan this QR code with your authenticator app:</p>
+                <div class="qr-container" id="qrContainer"></div>
+                <p>Or enter this key manually: <strong id="manualKey"></strong></p>
+                <button class="btn-primary" onclick="showVerifyStep()">Next</button>
+            </div>
+            <div id="twofaStep2" style="display: none;">
+                <p>Enter the 6-digit code from your authenticator app:</p>
+                <div class="form-group">
+                    <input type="text" id="twofaCode" placeholder="000000" maxlength="6" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="showQRStep()">Back</button>
+                    <button class="btn-primary" onclick="verify2FA()">Verify & Enable</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2FA Disable Modal -->
+<div class="modal" id="disable2faModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Disable 2-Step Verification</h3>
+            <button class="close-btn" onclick="closeModal('disable2faModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Enter your password to disable 2-Step Verification:</p>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="disable2faPassword" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('disable2faModal')">Cancel</button>
+            <button class="btn-primary" onclick="confirmDisable2FA()">Disable</button>
+        </div>
+    </div>
+</div>
+
+<!-- Recovery Email Modal -->
+<div class="modal" id="recoveryEmailModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="recoveryEmailTitle">Add Recovery Email</h3>
+            <button class="close-btn" onclick="closeModal('recoveryEmailModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="recoveryEmailBody">
+            <div id="emailStep1">
+                <div class="form-group">
+                    <label>Recovery Email</label>
+                    <input type="email" id="recoveryEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="recoveryEmailPassword" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('recoveryEmailModal')">Cancel</button>
+                    <button class="btn-primary" onclick="sendEmailVerification()">Send Code</button>
+                </div>
+            </div>
+            <div id="emailStep2" style="display: none;">
+                <p>Enter the verification code sent to your email:</p>
+                <div class="form-group">
+                    <input type="text" id="emailVerificationCode" placeholder="ABC123" maxlength="6" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="showEmailStep1()">Back</button>
+                    <button class="btn-primary" onclick="verifyRecoveryEmail()">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recovery Phone Modal -->
+<div class="modal" id="recoveryPhoneModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="recoveryPhoneTitle">Add Recovery Phone</h3>
+            <button class="close-btn" onclick="closeModal('recoveryPhoneModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="recoveryPhoneBody">
+            <div id="phoneStep1">
+                <div class="form-group">
+                    <label>Recovery Phone</label>
+                    <input type="tel" id="recoveryPhone" placeholder="+1234567890" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="recoveryPhonePassword" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('recoveryPhoneModal')">Cancel</button>
+                    <button class="btn-primary" onclick="sendPhoneVerification()">Send Code</button>
+                </div>
+            </div>
+            <div id="phoneStep2" style="display: none;">
+                <p>Enter the verification code sent to your phone:</p>
+                <div class="form-group">
+                    <input type="text" id="phoneVerificationCode" placeholder="123456" maxlength="6" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="showPhoneStep1()">Back</button>
+                    <button class="btn-primary" onclick="verifyRecoveryPhone()">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    margin-bottom: 30px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.back-btn:hover {
+    background: #e8eaed;
+    color: #202124;
+    transform: translateX(-2px);
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.security-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.section h3 {
+    font-size: 24px;
+    margin-bottom: 4px;
+    color: #202124;
+}
+
+.section-header p {
+    color: #5f6368;
+    font-size: 16px;
+    margin: 0;
+}
+
+.security-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.security-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.security-card:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+    transform: translateY(-2px);
+}
+
+.security-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.security-icon.success {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.security-icon.warning {
+    background: #fef7e0;
+    color: #f9ab00;
+}
+
+.security-content h4 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #202124;
+}
+
+.security-content p {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 8px;
+}
+
+.security-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.security-status.success {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.security-status.warning {
+    background: #fef7e0;
+    color: #f9ab00;
+}
+
+.security-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid #1a73e8;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #1a73e8;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.security-btn:hover {
+    background: #1a73e8;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.security-btn.primary {
+    background: #1a73e8;
+    color: white;
+}
+
+.security-btn.primary:hover {
+    background: #1669c1;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.setting-info p {
+    color: #5f6368;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #1a73e8;
+}
+
+.edit-btn:hover {
+    background: #f8f9fa;
+}
+
+.activity-list, .device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item, .device-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.activity-icon, .device-icon {
+    width: 40px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+}
+
+.activity-info h4, .device-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.activity-info p, .device-info p {
+    color: #5f6368;
+    font-size: 14px;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+.btn-secondary:hover {
+    background: #f8f9fa;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #5f6368;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-primary {
+    padding: 8px 16px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1669c1;
+}
+
+.loading {
+    text-align: center;
+    color: #5f6368;
+    padding: 20px;
+}
+
+.qr-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.qr-container img {
+    max-width: 200px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+#twofaCode, #emailVerificationCode, #phoneVerificationCode {
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-family: monospace;
+}
+
+#manualKey {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    word-break: break-all;
+}
+
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-group input[type="tel"] {
+    font-family: monospace;
+}
+
+@media (max-width: 600px) {
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .activity-item, .device-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+function changePassword() {
+    document.getElementById('passwordModal').style.display = 'block';
+}
+
+// 2FA Functions
+function setup2FA() {
+    fetch('/api/setup-2fa', { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('qrContainer').innerHTML = `<img src="${data.qr_code}" alt="QR Code">`;
+            document.getElementById('manualKey').textContent = data.secret;
+            document.getElementById('twofaModal').style.display = 'block';
+        } else {
+            alert(data.error || 'Error setting up 2FA');
+        }
+    });
+}
+
+function disable2FA() {
+    document.getElementById('disable2faModal').style.display = 'block';
+}
+
+function confirmDisable2FA() {
+    const password = document.getElementById('disable2faPassword').value;
+    
+    fetch('/api/disable-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('2FA disabled successfully');
+            closeModal('disable2faModal');
+            location.reload();
+        } else {
+            alert(data.error || 'Error disabling 2FA');
+        }
+    });
+}
+
+function showVerifyStep() {
+    document.getElementById('twofaStep1').style.display = 'none';
+    document.getElementById('twofaStep2').style.display = 'block';
+}
+
+function showQRStep() {
+    document.getElementById('twofaStep1').style.display = 'block';
+    document.getElementById('twofaStep2').style.display = 'none';
+}
+
+function verify2FA() {
+    const code = document.getElementById('twofaCode').value;
+    
+    fetch('/api/verify-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('2FA enabled successfully!');
+            closeModal('twofaModal');
+            location.reload();
+        } else {
+            alert(data.error || 'Invalid code');
+        }
+    });
+}
+
+// Recovery Email Functions
+function editRecoveryEmail() {
+    document.getElementById('recoveryEmailModal').style.display = 'block';
+}
+
+function sendEmailVerification() {
+    const email = document.getElementById('recoveryEmail').value;
+    const password = document.getElementById('recoveryEmailPassword').value;
+    
+    fetch('/api/add-recovery-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Verification code sent to ${email}. Code: ${data.code}`);
+            showEmailStep2();
+        } else {
+            alert(data.error || 'Error sending verification');
+        }
+    });
+}
+
+function showEmailStep2() {
+    document.getElementById('emailStep1').style.display = 'none';
+    document.getElementById('emailStep2').style.display = 'block';
+}
+
+function showEmailStep1() {
+    document.getElementById('emailStep1').style.display = 'block';
+    document.getElementById('emailStep2').style.display = 'none';
+}
+
+function verifyRecoveryEmail() {
+    const code = document.getElementById('emailVerificationCode').value;
+    
+    fetch('/api/verify-recovery-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Recovery email verified successfully!');
+            closeModal('recoveryEmailModal');
+            location.reload();
+        } else {
+            alert(data.error || 'Invalid code');
+        }
+    });
+}
+
+// Recovery Phone Functions
+function editRecoveryPhone() {
+    document.getElementById('recoveryPhoneModal').style.display = 'block';
+}
+
+function sendPhoneVerification() {
+    const phone = document.getElementById('recoveryPhone').value;
+    const password = document.getElementById('recoveryPhonePassword').value;
+    
+    fetch('/api/add-recovery-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Verification code sent to ${phone}. Code: ${data.code}`);
+            showPhoneStep2();
+        } else {
+            alert(data.error || 'Error sending verification');
+        }
+    });
+}
+
+function showPhoneStep2() {
+    document.getElementById('phoneStep1').style.display = 'none';
+    document.getElementById('phoneStep2').style.display = 'block';
+}
+
+function showPhoneStep1() {
+    document.getElementById('phoneStep1').style.display = 'block';
+    document.getElementById('phoneStep2').style.display = 'none';
+}
+
+function verifyRecoveryPhone() {
+    const code = document.getElementById('phoneVerificationCode').value;
+    
+    fetch('/api/verify-recovery-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Recovery phone verified successfully!');
+            closeModal('recoveryPhoneModal');
+            location.reload();
+        } else {
+            alert(data.error || 'Invalid code');
+        }
+    });
+}
+
+function goBack() {
+    window.history.back();
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    
+    // Reset modal states
+    if (modalId === 'twofaModal') {
+        document.getElementById('twofaStep1').style.display = 'block';
+        document.getElementById('twofaStep2').style.display = 'none';
+        document.getElementById('twofaCode').value = '';
+    }
+    
+    if (modalId === 'recoveryEmailModal') {
+        document.getElementById('emailStep1').style.display = 'block';
+        document.getElementById('emailStep2').style.display = 'none';
+        document.getElementById('recoveryEmail').value = '';
+        document.getElementById('recoveryEmailPassword').value = '';
+        document.getElementById('emailVerificationCode').value = '';
+    }
+    
+    if (modalId === 'recoveryPhoneModal') {
+        document.getElementById('phoneStep1').style.display = 'block';
+        document.getElementById('phoneStep2').style.display = 'none';
+        document.getElementById('recoveryPhone').value = '';
+        document.getElementById('recoveryPhonePassword').value = '';
+        document.getElementById('phoneVerificationCode').value = '';
+    }
+    
+    if (modalId === 'disable2faModal') {
+        document.getElementById('disable2faPassword').value = '';
+    }
+}
+
+function savePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        alert('New passwords do not match');
+        return;
+    }
+    
+    fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Password changed successfully');
+            closeModal('passwordModal');
+        } else {
+            alert(data.message || 'Error changing password');
+        }
+    });
+}
+
+// Load devices
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/login-devices');
+        const data = await response.json();
+        const deviceList = document.getElementById('deviceList');
+        
+        if (data.devices && data.devices.length > 0) {
+            deviceList.innerHTML = data.devices.slice(0, 3).map(device => `
+                <div class="device-item">
+                    <div class="device-icon">
+                        <i class="fas fa-${device.deviceType === 'mobile' ? 'mobile-alt' : 'desktop'}"></i>
+                    </div>
+                    <div class="device-info">
+                        <h4>${device.deviceName || 'Unknown Device'}</h4>
+                        <p>Last active: ${new Date(device.lastActive).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            deviceList.innerHTML = '<div class="loading">No devices found</div>';
+        }
+    } catch (error) {
+        document.getElementById('deviceList').innerHTML = '<div class="loading">Error loading devices</div>';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Account{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f8f9fa;
+            color: #202124;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 28px;
+            width: auto;
+            max-width: 120px;
+        }
+
+        .home-link {
+            font-size: 20px;
+            color: #202124;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .home-link:hover {
+            color: #1a73e8;
+        }
+
+        .search-section {
+            background: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 24px;
+            font-size: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1001;
+        }
+
+        .search-result {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .search-result:hover {
+            background: #f8f9fa;
+        }
+
+        .search-result:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 320px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1001;
+        }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .dropdown-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .dropdown-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .dropdown-email {
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #202124;
+            font-size: 14px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #202124;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-section-title {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5f6368;
+            text-transform: uppercase;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .account-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .account-logout-btn:hover {
+            background-color: #fce8e6 !important;
+            color: #ea4335 !important;
+            opacity: 1 !important;
+        }
+        
+        .account-item:hover .account-logout-btn {
+            opacity: 1;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+        .account-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .account-email {
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .profile-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+
+        .profile-card h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .profile-card p {
+            font-size: 14px;
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #202124;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 15px;
+        }
+
+        .card button {
+            padding: 8px 16px;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .card button:hover {
+            background: #1669c1;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-wrap: wrap;
+            }
+
+            header h1 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            header .search-box {
+                margin: 10px 0;
+                width: 100%;
+            }
+
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-card img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Roxli" class="logo">
+            <a href="/" class="home-link">Account</a>
+        </div>
+        <div class="profile-dropdown">
+            <div class="profile-avatar-wrapper" style="position: relative; width: 36px; height: 36px;">
+                {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}
+                    <img src="{{ user.avatar }}" alt="Profile" class="profile-pic" onclick="toggleDropdown()" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                {% endif %}
+                <div class="profile-initials" onclick="toggleDropdown()" style="background: linear-gradient(135deg, #667eea, #764ba2); display: {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}none{% else %}flex{% endif %}; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}position: absolute; top: 0; left: 0;{% endif %}">
+                    {{ user.firstName[0] if user and user.firstName else 'U' }}{{ user.lastName[0] if user and user.lastName else '' }}
+                </div>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar-wrapper" style="position: relative; width: 40px; height: 40px;">
+                        {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}
+                            <img src="{{ user.avatar }}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        {% endif %}
+                        <div class="profile-initials" style="background: linear-gradient(135deg, #667eea, #764ba2); display: {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}none{% else %}flex{% endif %}; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: white; width: 40px; height: 40px; border-radius: 50%; {% if user and user.avatar and 'data:image/svg+xml' not in user.avatar %}position: absolute; top: 0; left: 0;{% endif %}">
+                            {{ user.firstName[0] if user and user.firstName else 'U' }}{{ user.lastName[0] if user and user.lastName else '' }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="dropdown-name">{{ user.firstName + ' ' + user.lastName if user else 'John Doe' }}</div>
+                        <div class="dropdown-email">{{ user.email if user else 'johndoe@example.com' }}</div>
+                    </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="/profile" class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    Manage your Account
+                </a>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-section-title">Switch accounts</div>
+                <div id="accountsList"></div>
+                <a href="#" class="dropdown-item" onclick="addAccount()">
+                    <i class="fas fa-plus"></i>
+                    Add another account
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sign out
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="search-section">
+        <div class="search-box">
+            <input type="text" placeholder="Search in account" id="searchInput" onkeyup="performSearch()">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        const searchData = [
+            { title: 'Personal Info', url: '/profile', description: 'Manage your basic information' },
+            { title: 'Security', url: '/security', description: 'Update password and security settings' },
+            { title: 'Privacy', url: '/privacy', description: 'Control your privacy settings' },
+            { title: 'Devices', url: '/devices', description: 'Manage your devices' },
+            { title: 'Profile', url: '/profile', description: 'Edit your profile information' },
+            { title: 'Password', url: '/security', description: 'Change your password' },
+            { title: 'Two-factor', url: '/security', description: 'Enable two-factor authentication' }
+        ];
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const results = document.getElementById('searchResults');
+            
+            if (query.length === 0) {
+                results.style.display = 'none';
+                return;
+            }
+            
+            const filtered = searchData.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.description.toLowerCase().includes(query)
+            );
+            
+            if (filtered.length > 0) {
+                results.innerHTML = filtered.map(item => 
+                    `<div class="search-result" onclick="window.location.href='${item.url}'">
+                        <div style="font-weight: 600;">${item.title}</div>
+                        <div style="font-size: 12px; color: #5f6368;">${item.description}</div>
+                    </div>`
+                ).join('');
+                results.style.display = 'block';
+            } else {
+                results.innerHTML = '<div class="search-result">No results found</div>';
+                results.style.display = 'block';
+            }
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function logout() {
+            fetch('/api/logout', { method: 'POST' })
+                .then(() => {
+                    // Clear local storage
+                    localStorage.removeItem('roxli_logged_accounts');
+                    // Redirect to account management login page instead of main auth
+                    window.location.href = '/login-required';
+                })
+                .catch(() => {
+                    // Even if logout fails, redirect to login page
+                    window.location.href = '/login-required';
+                });
+        }
+
+        function addAccount() {
+            const popup = window.open('https://auth.roxli.in/popup', 'roxli-auth', 'width=400,height=600,scrollbars=yes,resizable=yes');
+            
+            const messageHandler = function(event) {
+                if (event.origin !== 'https://auth.roxli.in') return;
+                
+                if (event.data.type === 'ROXLI_AUTH_SUCCESS') {
+                    popup.close();
+                    window.removeEventListener('message', messageHandler);
+                    
+                    // Set token and reload page
+                    fetch('/api/set-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: event.data.token })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Store account in localStorage if requested
+                            if (data.storeAccount && data.accountEmail) {
+                                const loggedAccounts = JSON.parse(localStorage.getItem('roxli_logged_accounts') || '[]');
+                                if (!loggedAccounts.includes(data.accountEmail)) {
+                                    loggedAccounts.push(data.accountEmail);
+                                    localStorage.setItem('roxli_logged_accounts', JSON.stringify(loggedAccounts));
+                                }
+                            }
+                            window.location.reload();
+                        }
+                    })
+                    .catch(console.error);
+                }
+            };
+            
+            window.addEventListener('message', messageHandler);
+        }
+
+        function switchToAccount(email) {
+            fetch('/api/switch-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error switching account');
+                }
+            });
+        }
+
+        function logoutAccount(email) {
+            event.stopPropagation();
+            if (confirm(`Logout ${email} from this device?`)) {
+                const savedAccounts = JSON.parse(localStorage.getItem('roxli_accounts') || '[]');
+                const loggedAccounts = JSON.parse(localStorage.getItem('roxli_logged_accounts') || '[]');
+                
+                const updatedSaved = savedAccounts.filter(acc => acc.email !== email);
+                const updatedLogged = loggedAccounts.filter(acc => acc !== email);
+                
+                localStorage.setItem('roxli_accounts', JSON.stringify(updatedSaved));
+                localStorage.setItem('roxli_logged_accounts', JSON.stringify(updatedLogged));
+                
+                loadAccounts();
+                alert(`${email} logged out from this device`);
+            }
+        }
+
+        function loadAccounts() {
+            const loggedInEmails = JSON.parse(localStorage.getItem('roxli_logged_accounts') || '[]');
+            
+            fetch(`/api/available-accounts?${loggedInEmails.map(email => `emails=${email}`).join('&')}`)
+                .then(response => response.json())
+                .then(data => {
+                    const accountsList = document.getElementById('accountsList');
+                    if (data.accounts && data.accounts.length > 1) {
+                        const otherAccounts = data.accounts.filter(acc => acc.email !== data.currentUser.email);
+                        accountsList.innerHTML = otherAccounts.map(account => {
+                            const hasAvatar = account.avatar && !account.avatar.includes('data:image/svg+xml');
+                            return `
+                            <div class="account-item" onclick="switchToAccount('${account.email}')">
+                                <div class="account-avatar-wrapper" style="position: relative; width: 32px; height: 32px;">
+                                    ${hasAvatar ? 
+                                        `<img src="${account.avatar}" alt="${account.firstName}" class="account-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
+                                        ''
+                                    }
+                                    <div class="profile-initials" style="background: linear-gradient(135deg, #667eea, #764ba2); display: ${hasAvatar ? 'none' : 'flex'}; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: white; width: 32px; height: 32px; border-radius: 50%; ${hasAvatar ? 'position: absolute; top: 0; left: 0;' : ''}">
+                                        ${account.firstName[0]}${account.lastName[0]}
+                                    </div>
+                                </div>
+                                <div class="account-info">
+                                    <div class="account-name">${account.firstName} ${account.lastName}</div>
+                                    <div class="account-email">${account.email}</div>
+                                </div>
+                                <button onclick="logoutAccount('${account.email}')" class="account-logout-btn" title="Logout from this device" style="background: none; border: none; color: #9aa0a6; font-size: 16px; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; opacity: 0.7;">×</button>
+                            </div>
+                        `}).join('');
+                    }
+                })
+                .catch(error => console.error('Error loading accounts:', error));
+        }
+
+        // Load accounts when dropdown opens
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                loadAccounts();
+                dropdown.style.display = 'block';
+            }
+        }
+
+
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.search-box')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+            if (!event.target.closest('.profile-dropdown')) {
+                document.getElementById('dropdownMenu').style.display = 'none';
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/auth-bridge.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/account.js') }}"></script>
+</body>
+</html>

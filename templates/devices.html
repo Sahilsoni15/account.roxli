@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+
+{% block title %}Devices - Account{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-nav">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <div class="header-content">
+            <h1>Your devices</h1>
+            <p>Devices where you're currently signed in to your Roxli Account</p>
+        </div>
+    </div>
+</div>
+
+<div class="devices-section">
+    <div class="section">
+        <h3>This device</h3>
+        <p>You're currently using this device</p>
+        
+        <div class="device-item current-device">
+            <div class="device-icon">
+                <i class="fas fa-desktop"></i>
+            </div>
+            <div class="device-info">
+                <h4>Current Browser</h4>
+                <p id="currentDeviceInfo">Loading...</p>
+                <span class="device-badge current">Current device</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Other devices</h3>
+        <p>Devices where you're signed in</p>
+        
+        <div class="device-list" id="deviceList">
+            <div class="loading">Loading devices...</div>
+        </div>
+        
+        <button class="btn-secondary" onclick="signOutAllDevices()">
+            Sign out of all other devices
+        </button>
+    </div>
+</div>
+
+<!-- Device Details Modal -->
+<div class="modal" id="deviceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Device details</h3>
+            <button class="close-btn" onclick="closeModal('deviceModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="deviceDetails">
+            <!-- Device details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('deviceModal')">Close</button>
+            <button class="btn-danger" onclick="showPasswordModal()">Sign out</button>
+        </div>
+    </div>
+</div>
+
+<!-- Password Verification Modal -->
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm sign out</h3>
+            <button class="close-btn" onclick="closeModal('passwordModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Enter your password to sign out this device:</p>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="devicePassword" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('passwordModal')">Cancel</button>
+            <button class="btn-danger" onclick="confirmSignOut()">Sign out</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    margin-bottom: 30px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.back-btn:hover {
+    background: #e8eaed;
+    color: #202124;
+    transform: translateX(-2px);
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.devices-section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.section > p {
+    color: #5f6368;
+    margin-bottom: 24px;
+}
+
+.device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.device-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.device-item:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+}
+
+.current-device {
+    border-color: #34a853;
+    background: #f8fff9;
+}
+
+.device-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 20px;
+}
+
+.current-device .device-icon {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.device-info {
+    flex: 1;
+    position: relative;
+}
+
+.device-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.device-info p {
+    color: #5f6368;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.device-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.device-badge.current {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.device-badge.active {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.device-badge.inactive {
+    background: #fafafa;
+    color: #757575;
+}
+
+.device-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.device-action-btn {
+    padding: 6px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: #1a73e8;
+}
+
+.device-action-btn:hover {
+    background: #f8f9fa;
+}
+
+.device-action-btn.danger {
+    color: #d93025;
+    border-color: #d93025;
+}
+
+.device-action-btn.danger:hover {
+    background: #fce8e6;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #f8f9fa;
+}
+
+.btn-danger {
+    padding: 8px 16px;
+    background: #d93025;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #c5221f;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #5f6368;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.loading {
+    text-align: center;
+    color: #5f6368;
+    padding: 20px;
+}
+
+.detail-item {
+    margin-bottom: 16px;
+}
+
+.detail-item h5 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.detail-item p {
+    color: #5f6368;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .device-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .device-actions {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+let selectedDeviceId = null;
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function showDeviceDetails(device) {
+    selectedDeviceId = device.id;
+    const modal = document.getElementById('deviceModal');
+    const details = document.getElementById('deviceDetails');
+    
+    details.innerHTML = `
+        <div class="detail-item">
+            <h5>Device name</h5>
+            <p>${device.deviceName || 'Unknown Device'}</p>
+        </div>
+        <div class="detail-item">
+            <h5>Device type</h5>
+            <p>${device.deviceType || 'Unknown'}</p>
+        </div>
+        <div class="detail-item">
+            <h5>Browser</h5>
+            <p>${device.browser || 'Unknown'}</p>
+        </div>
+        <div class="detail-item">
+            <h5>Operating system</h5>
+            <p>${device.os || 'Unknown'}</p>
+        </div>
+        <div class="detail-item">
+            <h5>IP address</h5>
+            <p>${device.ipAddress || 'Unknown'}</p>
+        </div>
+        <div class="detail-item">
+            <h5>Last active</h5>
+            <p>${new Date(device.lastActive).toLocaleString()}</p>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function showPasswordModal() {
+    closeModal('deviceModal');
+    document.getElementById('passwordModal').style.display = 'block';
+}
+
+function confirmSignOut() {
+    if (!selectedDeviceId) return;
+    
+    const password = document.getElementById('devicePassword').value;
+    if (!password) {
+        alert('Please enter your password');
+        return;
+    }
+    
+    fetch('/api/logout-device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId: selectedDeviceId, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal('passwordModal');
+            document.getElementById('devicePassword').value = '';
+            loadDevices();
+            alert('Device signed out successfully');
+        } else {
+            alert(data.error || 'Error signing out device');
+        }
+    });
+}
+
+function signOutAllDevices() {
+    if (confirm('Are you sure you want to sign out of all other devices?')) {
+        fetch('/api/logout-all-devices', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadDevices();
+            } else {
+                alert('Error signing out of devices');
+            }
+        });
+    }
+}
+
+function loadDevices() {
+    fetch('/api/login-devices')
+        .then(response => response.json())
+        .then(data => {
+            const deviceList = document.getElementById('deviceList');
+            
+            if (data.devices && data.devices.length > 0) {
+                const otherDevices = data.devices.filter(device => !device.isCurrent);
+                
+                if (otherDevices.length > 0) {
+                    deviceList.innerHTML = otherDevices.map(device => `
+                        <div class="device-item" onclick="showDeviceDetails(${JSON.stringify(device).replace(/"/g, '&quot;')})">
+                            <div class="device-icon">
+                                <i class="fas fa-${device.deviceType === 'mobile' ? 'mobile-alt' : 'desktop'}"></i>
+                            </div>
+                            <div class="device-info">
+                                <h4>${device.deviceName || 'Unknown Device'}</h4>
+                                <p>${device.browser || 'Unknown Browser'} • ${device.os || 'Unknown OS'}</p>
+                                <span class="device-badge ${device.isActive ? 'active' : 'inactive'}">
+                                    ${device.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                            <div class="device-actions">
+                                <button class="device-action-btn danger" onclick="event.stopPropagation(); signOutSpecificDevice('${device.id}')">
+                                    Sign out
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    deviceList.innerHTML = '<div class="loading">No other devices found</div>';
+                }
+            } else {
+                deviceList.innerHTML = '<div class="loading">No devices found</div>';
+            }
+        })
+        .catch(error => {
+            document.getElementById('deviceList').innerHTML = '<div class="loading">Error loading devices</div>';
+        });
+}
+
+function signOutSpecificDevice(deviceId) {
+    const password = prompt('Enter your password to sign out this device:');
+    if (!password) return;
+    
+    fetch('/api/logout-device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadDevices();
+            alert('Device signed out successfully');
+        } else {
+            alert(data.error || 'Error signing out device');
+        }
+    });
+}
+
+// Load current device info
+document.addEventListener('DOMContentLoaded', () => {
+    const currentDeviceInfo = document.getElementById('currentDeviceInfo');
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform;
+    
+    let browser = 'Unknown Browser';
+    if (userAgent.includes('Chrome')) browser = 'Chrome';
+    else if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Safari')) browser = 'Safari';
+    else if (userAgent.includes('Edge')) browser = 'Edge';
+    
+    currentDeviceInfo.textContent = `${browser} • ${platform} • Active now`;
+    
+    loadDevices();
+});
+
+function goBack() {
+    window.history.back();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,848 @@
+/* Google Account UI - Light/Dark Theme */
+
+:root {
+    --google-blue: #1a73e8;
+    --google-blue-hover: #1557b0;
+    --google-red: #ea4335;
+    --google-green: #34a853;
+    --google-yellow: #fbbc04;
+    
+    --border-radius: 8px;
+    --border-radius-large: 12px;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme (Default) */
+:root,
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #f1f3f4;
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --text-muted: #80868b;
+    --border-color: #e8eaed;
+    --border-light: #f1f3f4;
+    --shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    --shadow-light: 0 1px 2px 0 rgba(60, 64, 67, 0.1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-primary: #202124;
+    --bg-secondary: #303134;
+    --bg-tertiary: #3c4043;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --text-muted: #80868b;
+    --border-color: #3c4043;
+    --border-light: #303134;
+    --shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+    --shadow-light: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Auto Dark Theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #202124;
+        --bg-secondary: #303134;
+        --bg-tertiary: #3c4043;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa0a6;
+        --text-muted: #80868b;
+        --border-color: #3c4043;
+        --border-light: #303134;
+        --shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+        --shadow-light: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* MOBILE UI (Default - up to 767px) */
+.account-container {
+    min-height: 100vh;
+    background: var(--bg-secondary);
+}
+
+/* Google Mobile Header */
+.google-mobile-header {
+    background: var(--bg-primary);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-light);
+}
+
+.google-mobile-menu {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    color: var(--google-grey-600);
+}
+
+.google-mobile-title {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.google-mobile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Google Profile Card */
+.google-profile-card {
+    background: var(--bg-primary);
+    margin: 0;
+    padding: 32px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.google-profile-avatar-large {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: block;
+}
+
+.google-profile-name {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.google-profile-email {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.google-manage-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--google-blue);
+    padding: 9px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.google-manage-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Google Menu Items */
+.google-menu-section {
+    background: var(--bg-primary);
+    margin-bottom: 8px;
+}
+
+.google-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.1s;
+}
+
+.google-menu-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.google-menu-item:last-child {
+    border-bottom: none;
+}
+
+.google-menu-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 16px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-menu-content {
+    flex: 1;
+}
+
+.google-menu-title {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.google-menu-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.google-menu-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+/* Hide desktop/tablet elements on mobile */
+@media (max-width: 767px) {
+    .sidebar,
+    .desktop-header,
+    .mobile-header,
+    .card,
+    .stats-grid,
+    .content-grid {
+        display: none;
+    }
+    
+    .main-content {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .content-wrapper {
+        padding: 0;
+    }
+}
+
+/* TABLET UI (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    body {
+        background: var(--bg-secondary);
+    }
+    
+    .google-mobile-header,
+    .google-profile-card,
+    .google-menu-section {
+        display: none;
+    }
+    
+    .account-container {
+        display: flex;
+        background: var(--google-grey-100);
+    }
+    
+    /* Google Tablet Sidebar */
+    .google-tablet-sidebar {
+        width: 280px;
+        background: var(--bg-primary);
+        border-right: 1px solid var(--border-color);
+        height: 100vh;
+        position: fixed;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .google-tablet-header {
+        padding: 24px 20px;
+        border-bottom: 1px solid var(--google-grey-200);
+    }
+    
+    .google-tablet-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+    
+    .google-tablet-logo-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--google-blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    .google-tablet-profile {
+        padding: 20px;
+        border-bottom: 1px solid var(--google-grey-200);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .google-tablet-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+    
+    .google-tablet-user-info h3 {
+        font-size: 16px;
+        font-weight: 400;
+        margin-bottom: 2px;
+        color: var(--google-grey-800);
+    }
+    
+    .google-tablet-user-info p {
+        font-size: 14px;
+        color: var(--google-grey-600);
+        margin: 0;
+    }
+    
+    .google-tablet-nav {
+        flex: 1;
+        padding: 8px 0;
+    }
+    
+    .google-tablet-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: var(--transition);
+        border-radius: 0 20px 20px 0;
+        margin-right: 12px;
+        font-weight: 400;
+    }
+    
+    .google-tablet-nav-item:hover {
+        background: var(--google-grey-100);
+    }
+    
+    .google-tablet-nav-item.active {
+        background: #e8f0fe;
+        color: var(--google-blue);
+        font-weight: 500;
+    }
+    
+    .google-tablet-nav-icon {
+        font-size: 20px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    /* Tablet Main Content */
+    .main-content {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        background: var(--google-grey-100);
+        min-height: 100vh;
+    }
+    
+    .content-wrapper {
+        padding: 32px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .google-tablet-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-large);
+        border: 1px solid var(--border-color);
+        margin-bottom: 24px;
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .google-tablet-card-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--google-grey-200);
+    }
+    
+    .google-tablet-card-title {
+        font-size: 20px;
+        font-weight: 400;
+        color: var(--google-grey-800);
+        margin-bottom: 4px;
+    }
+    
+    .google-tablet-card-subtitle {
+        color: var(--google-grey-600);
+        font-size: 14px;
+    }
+    
+    .google-tablet-card-body {
+        padding: 24px;
+    }
+}
+
+/* DESKTOP UI (1024px+) */
+@media (min-width: 1025px) {
+    body {
+        background: var(--bg-secondary);
+    }
+    
+    .google-mobile-header,
+    .google-profile-card,
+    .google-menu-section,
+    .google-tablet-sidebar {
+        display: none;
+    }
+    
+    .account-container {
+        display: flex;
+        background: var(--google-grey-100);
+    }
+    
+    /* Google Desktop Sidebar */
+    .google-desktop-sidebar {
+        width: 280px;
+        background: var(--bg-primary);
+        border-right: 1px solid var(--border-color);
+        height: 100vh;
+        position: fixed;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .google-desktop-header {
+        padding: 32px 24px 24px;
+        border-bottom: 1px solid var(--google-grey-200);
+    }
+    
+    .google-desktop-logo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 24px;
+        font-weight: 400;
+        color: var(--google-grey-800);
+        margin-bottom: 24px;
+    }
+    
+    .google-desktop-logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--google-blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 500;
+        font-size: 16px;
+    }
+    
+    .google-desktop-profile {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: var(--google-grey-50);
+        border-radius: var(--border-radius-large);
+    }
+    
+    .google-desktop-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+    
+    .google-desktop-user-info h3 {
+        font-size: 16px;
+        font-weight: 400;
+        margin-bottom: 2px;
+        color: var(--google-grey-800);
+    }
+    
+    .google-desktop-user-info p {
+        font-size: 14px;
+        color: var(--google-grey-600);
+        margin: 0;
+    }
+    
+    .google-desktop-nav {
+        flex: 1;
+        padding: 16px 0;
+    }
+    
+    .google-desktop-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px;
+        color: var(--google-grey-700);
+        text-decoration: none;
+        transition: var(--transition);
+        border-radius: 0 24px 24px 0;
+        margin-right: 12px;
+        font-size: 14px;
+    }
+    
+    .google-desktop-nav-item:hover {
+        background: var(--google-grey-100);
+    }
+    
+    .google-desktop-nav-item.active {
+        background: #e8f0fe;
+        color: var(--google-blue);
+        font-weight: 500;
+    }
+    
+    .google-desktop-nav-icon {
+        font-size: 20px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    /* Desktop Main Content */
+    .main-content {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        background: var(--google-grey-100);
+        min-height: 100vh;
+    }
+    
+    .content-wrapper {
+        padding: 48px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .google-desktop-page-header {
+        margin-bottom: 32px;
+    }
+    
+    .google-desktop-page-title {
+        font-size: 32px;
+        font-weight: 400;
+        color: var(--google-grey-800);
+        margin-bottom: 8px;
+    }
+    
+    .google-desktop-page-subtitle {
+        color: var(--google-grey-600);
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    
+    .google-desktop-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius-large);
+        border: 1px solid var(--border-color);
+        margin-bottom: 32px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+    
+    .google-desktop-card-header {
+        padding: 32px 32px 16px;
+        border-bottom: 1px solid var(--google-grey-200);
+    }
+    
+    .google-desktop-card-title {
+        font-size: 24px;
+        font-weight: 400;
+        color: var(--google-grey-800);
+        margin-bottom: 8px;
+    }
+    
+    .google-desktop-card-subtitle {
+        color: var(--google-grey-600);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .google-desktop-card-body {
+        padding: 32px;
+    }
+    
+    .google-desktop-btn {
+        background: var(--google-blue);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .google-desktop-btn:hover {
+        background: var(--google-blue-hover);
+        box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+    
+    .google-desktop-btn-secondary {
+        background: transparent;
+        color: var(--google-blue);
+        border: 1px solid var(--google-grey-300);
+    }
+    
+    .google-desktop-btn-secondary:hover {
+        background: var(--google-grey-50);
+    }
+}
+
+/* Profile Dropdown - Enhanced */
+.profile-dropdown {
+    position: relative;
+    z-index: 1001;
+}
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-light);
+}
+
+.profile-btn:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--google-blue);
+}
+
+.profile-btn-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-arrow {
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    margin-right: 4px;
+}
+
+.profile-dropdown.open .profile-arrow {
+    transform: rotate(180deg);
+    color: var(--google-blue);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 360px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: var(--transition);
+    z-index: 1002;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.profile-dropdown.open .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dropdown-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+.dropdown-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.dropdown-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-email {
+    font-size: 14px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 8px 0;
+}
+
+.dropdown-accounts {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.account-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.account-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.account-item.current {
+    background: rgba(26, 115, 232, 0.1);
+    color: var(--google-blue);
+}
+
+.account-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.account-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.account-name {
+    font-weight: 400;
+    font-size: 14px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.account-email {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background-color 0.1s;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 767px) {
+    .dropdown-menu {
+        position: fixed;
+        top: 60px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+    }
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] {
+    --google-grey-50: #202124;
+    --google-grey-100: #303134;
+    --google-grey-200: #3c4043;
+    --google-grey-300: #5f6368;
+    --google-grey-400: #80868b;
+    --google-grey-500: #9aa0a6;
+    --google-grey-600: #bdc1c6;
+    --google-grey-700: #e8eaed;
+    --google-grey-800: #f8f9fa;
+    --google-grey-900: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --google-grey-50: #202124;
+        --google-grey-100: #303134;
+        --google-grey-200: #3c4043;
+        --google-grey-300: #5f6368;
+        --google-grey-400: #80868b;
+        --google-grey-500: #9aa0a6;
+        --google-grey-600: #bdc1c6;
+        --google-grey-700: #e8eaed;
+        --google-grey-800: #f8f9fa;
+        --google-grey-900: #ffffff;
+    }
+}

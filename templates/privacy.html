@@ -1,0 +1,536 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy - Account{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-nav">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <div class="header-content">
+            <h1>Privacy & personalization</h1>
+            <p>Control your data visibility and privacy settings across Roxli services</p>
+        </div>
+    </div>
+</div>
+
+<div class="privacy-sections">
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div>
+                <h3>Data & privacy</h3>
+                <p>Control what data is collected and how it's used</p>
+            </div>
+        </div>
+        
+        <div class="privacy-grid">
+            <div class="privacy-card">
+                <div class="privacy-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="privacy-content">
+                    <h4>Activity controls</h4>
+                    <p>Decide what activity is saved to your account</p>
+                    <span class="privacy-status active">Some activity is saved</span>
+                </div>
+                <button class="privacy-btn" onclick="manageActivity()">
+                    <i class="fas fa-cog"></i>
+                    Manage
+                </button>
+            </div>
+            
+            <div class="privacy-card">
+                <div class="privacy-icon">
+                    <i class="fas fa-ad"></i>
+                </div>
+                <div class="privacy-content">
+                    <h4>Ad personalization</h4>
+                    <p>Control how your data is used for ads</p>
+                    <span class="privacy-status active">Personalization is on</span>
+                </div>
+                <button class="privacy-btn" onclick="manageAds()">
+                    <i class="fas fa-cog"></i>
+                    Manage
+                </button>
+            </div>
+            
+            <div class="privacy-card">
+                <div class="privacy-icon">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <div class="privacy-content">
+                    <h4>Shared endorsements</h4>
+                    <p>Control if your name and photo appear in ads</p>
+                    <span class="privacy-status inactive">Endorsements are off</span>
+                </div>
+                <button class="privacy-btn" onclick="manageEndorsements()">
+                    <i class="fas fa-cog"></i>
+                    Manage
+                </button>
+            </div>
+            
+            <div class="privacy-card">
+                <div class="privacy-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="privacy-content">
+                    <h4>People & sharing</h4>
+                    <p>Control what others can see about you</p>
+                    <span class="privacy-status active">Some info is visible</span>
+                </div>
+                <button class="privacy-btn" onclick="managePeopleSharing()">
+                    <i class="fas fa-cog"></i>
+                    Manage
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div>
+                <h3>Data export & deletion</h3>
+                <p>Download or delete your data</p>
+            </div>
+        </div>
+        
+        <div class="data-actions">
+            <div class="data-action-card">
+                <div class="data-action-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="data-action-content">
+                    <h4>Download your data</h4>
+                    <p>Create an archive with a copy of your data from Roxli services</p>
+                </div>
+                <button class="data-action-btn" onclick="downloadData()">
+                    Download
+                </button>
+            </div>
+            
+            <div class="data-action-card">
+                <div class="data-action-icon danger">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="data-action-content">
+                    <h4>Delete your account</h4>
+                    <p>Permanently delete your Roxli Account and all associated data</p>
+                </div>
+                <button class="data-action-btn danger" onclick="deleteAccount()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h3>Privacy checkup</h3>
+                <p>Review and adjust your privacy settings</p>
+            </div>
+        </div>
+        
+        <div class="checkup-card">
+            <div class="checkup-content">
+                <h4>Take the Privacy Checkup</h4>
+                <p>Review the most important privacy settings for your Roxli Account in just a few minutes.</p>
+                <ul class="checkup-features">
+                    <li><i class="fas fa-check"></i> Review what data is saved</li>
+                    <li><i class="fas fa-check"></i> Control ad personalization</li>
+                    <li><i class="fas fa-check"></i> Manage sharing settings</li>
+                    <li><i class="fas fa-check"></i> Set up security features</li>
+                </ul>
+            </div>
+            <button class="checkup-btn" onclick="startPrivacyCheckup()">
+                <i class="fas fa-play"></i>
+                Start checkup
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    margin-bottom: 30px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.back-btn:hover {
+    background: #e8eaed;
+    color: #202124;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.privacy-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.section h3 {
+    font-size: 24px;
+    margin-bottom: 4px;
+    color: #202124;
+}
+
+.section-header p {
+    color: #5f6368;
+    font-size: 16px;
+    margin: 0;
+}
+
+.privacy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.privacy-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.privacy-card:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+    transform: translateY(-2px);
+}
+
+.privacy-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+
+.privacy-content h4 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #202124;
+}
+
+.privacy-content p {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 12px;
+}
+
+.privacy-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.privacy-status.active {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.privacy-status.inactive {
+    background: #fef7e0;
+    color: #f9ab00;
+}
+
+.privacy-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid #1a73e8;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #1a73e8;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.privacy-btn:hover {
+    background: #1a73e8;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.data-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.data-action-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.data-action-card:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+}
+
+.data-action-icon {
+    width: 56px;
+    height: 56px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 24px;
+}
+
+.data-action-icon.danger {
+    background: #fce8e6;
+    color: #d93025;
+}
+
+.data-action-content {
+    flex: 1;
+}
+
+.data-action-content h4 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #202124;
+}
+
+.data-action-content p {
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.data-action-btn {
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid #1a73e8;
+    border-radius: 20px;
+    color: #1a73e8;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.data-action-btn:hover {
+    background: #1a73e8;
+    color: white;
+}
+
+.data-action-btn.danger {
+    border-color: #d93025;
+    color: #d93025;
+}
+
+.data-action-btn.danger:hover {
+    background: #d93025;
+    color: white;
+}
+
+.checkup-card {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 32px;
+    background: linear-gradient(135deg, #f8f9fa, #e8eaed);
+    border-radius: 16px;
+}
+
+.checkup-content h4 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: #202124;
+}
+
+.checkup-content p {
+    font-size: 16px;
+    color: #5f6368;
+    margin-bottom: 16px;
+}
+
+.checkup-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.checkup-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.checkup-features i {
+    color: #34a853;
+}
+
+.checkup-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.checkup-btn:hover {
+    background: #1669c1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+@media (max-width: 768px) {
+    .privacy-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-action-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .checkup-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+function goBack() {
+    window.history.back();
+}
+
+function manageActivity() {
+    alert('Activity controls will be available soon');
+}
+
+function manageAds() {
+    alert('Ad personalization settings will be available soon');
+}
+
+function manageEndorsements() {
+    alert('Shared endorsements settings will be available soon');
+}
+
+function managePeopleSharing() {
+    alert('People & sharing settings will be available soon');
+}
+
+function downloadData() {
+    alert('Data download will be available soon');
+}
+
+function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        alert('Account deletion will be available soon');
+    }
+}
+
+function startPrivacyCheckup() {
+    alert('Privacy checkup will be available soon');
+}
+</script>
+{% endblock %}

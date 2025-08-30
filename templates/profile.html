@@ -1,0 +1,942 @@
+{% extends "base.html" %}
+
+{% block title %}Personal Info - Account{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-nav">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <div class="header-content">
+            <h1>Personal info</h1>
+            <p>Info about you and your preferences across Roxli services</p>
+        </div>
+    </div>
+</div>
+
+<div class="profile-container">
+    <!-- Basic Info Section -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <h2>Basic info</h2>
+                <p class="section-desc">Some info may be visible to other people using Roxli services</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card profile-card">
+                <div class="profile-pic-container">
+                    {% if user and user.avatar %}
+                        <img src="{{ user.avatar }}" alt="Profile Picture" id="profileImage" class="profile-pic-large">
+                    {% else %}
+                        <div class="profile-initials-large" id="profileInitials" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; border: 3px solid #f8f9fa;">
+                            {{ (user.firstName[0] + user.lastName[0]) if user else 'JD' }}
+                        </div>
+                        <img src="" alt="Profile Picture" id="profileImage" class="profile-pic-large" style="display: none;">
+                    {% endif %}
+                    <div class="profile-overlay">
+                        <button class="camera-btn" onclick="uploadAvatar()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h3>Profile picture</h3>
+                    <p>A profile picture helps personalize your account</p>
+                    <div class="avatar-actions">
+                        <button class="avatar-btn primary" onclick="uploadAvatar()">Change</button>
+                        <button class="avatar-btn secondary" onclick="removeAvatar()" id="removeBtn" style="display: {{ 'inline-block' if user and user.avatar and not user.avatar.startswith('data:') else 'none' }}">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(this)">
+
+            <div class="info-card" onclick="editName()">
+                <div class="info-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Name</h3>
+                    <p class="info-value">{{ user.firstName + ' ' + user.lastName if user else 'John Doe' }}</p>
+                    <span class="info-desc">Your name appears across Roxli services</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+
+            <div class="info-card" onclick="editBirthday()">
+                <div class="info-icon">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Birthday</h3>
+                    <p class="info-value">{{ user.birthday if user and user.birthday else 'Not set' }}</p>
+                    <span class="info-desc">Used to personalize your experience</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+
+            <div class="info-card" onclick="editGender()">
+                <div class="info-icon">
+                    <i class="fas fa-venus-mars"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Gender</h3>
+                    <p class="info-value">{{ user.gender if user and user.gender else 'Not specified' }}</p>
+                    <span class="info-desc">Used to customize your experience</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Info Section -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div>
+                <h2>Contact info</h2>
+                <p class="section-desc">Ways we can reach you</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon verified">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Email</h3>
+                    <p class="info-value">{{ user.email if user else 'johndoe@example.com' }}</p>
+                    <span class="info-desc">Primary email • Verified</span>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+
+            <div class="info-card" onclick="editPhone()">
+                <div class="info-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Phone</h3>
+                    <p class="info-value">{{ user.phone if user and user.phone else 'Not set' }}</p>
+                    <span class="info-desc">Used for account recovery and security</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Addresses Section -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+                <h2>Addresses</h2>
+                <p class="section-desc">Manage addresses associated with your account</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card" onclick="editAddress('home')">
+                <div class="info-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Home</h3>
+                    <p class="info-value">{{ user.homeAddress if user and user.homeAddress else 'Not set' }}</p>
+                    <span class="info-desc">Your home address</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+
+            <div class="info-card" onclick="editAddress('work')">
+                <div class="info-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Work</h3>
+                    <p class="info-value">{{ user.workAddress if user and user.workAddress else 'Not set' }}</p>
+                    <span class="info-desc">Your work address</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+
+            <div class="info-card" onclick="editAddress('other')">
+                <div class="info-icon">
+                    <i class="fas fa-map-pin"></i>
+                </div>
+                <div class="info-content">
+                    <h3>Other</h3>
+                    <p class="info-value">{{ user.otherAddress if user and user.otherAddress else 'Not set' }}</p>
+                    <span class="info-desc">Other addresses you added</span>
+                </div>
+                <span class="chevron">›</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Name Modal -->
+<div class="modal" id="nameModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit name</h3>
+            <button class="close-btn" onclick="closeModal('nameModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>First name</label>
+                <input type="text" id="firstName" value="{{ user.firstName if user else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Last name</label>
+                <input type="text" id="lastName" value="{{ user.lastName if user else '' }}">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('nameModal')">Cancel</button>
+            <button class="btn-primary" onclick="saveName()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Birthday Modal -->
+<div class="modal" id="birthdayModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit birthday</h3>
+            <button class="close-btn" onclick="closeModal('birthdayModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Birthday</label>
+                <input type="date" id="birthdayInput" value="{{ user.birthday if user and user.birthday else '' }}">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('birthdayModal')">Cancel</button>
+            <button class="btn-primary" onclick="saveBirthday()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Gender Modal -->
+<div class="modal" id="genderModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit gender</h3>
+            <button class="close-btn" onclick="closeModal('genderModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Gender</label>
+                <select id="genderSelect">
+                    <option value="">Prefer not to say</option>
+                    <option value="Male" {{ 'selected' if user and user.gender == 'Male' else '' }}>Male</option>
+                    <option value="Female" {{ 'selected' if user and user.gender == 'Female' else '' }}>Female</option>
+                    <option value="Other" {{ 'selected' if user and user.gender == 'Other' else '' }}>Other</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('genderModal')">Cancel</button>
+            <button class="btn-primary" onclick="saveGender()">Save</button>
+        </div>
+    </div>
+</div>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f9f9f9;
+    color: #202124;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.back-btn:hover {
+    background: #eee;
+    color: #202124;
+    transform: translateX(-2px);
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.page-header p {
+    color: #5f6368;
+    font-size: 14px;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    padding: 32px;
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.section h2 {
+    font-size: 24px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #202124;
+}
+
+.section-desc {
+    color: #5f6368;
+    font-size: 14px;
+    margin: 0;
+}
+
+.info-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.info-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid #e8eaed;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.info-card:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+    transform: translateY(-1px);
+}
+
+.profile-card {
+    flex-direction: row;
+    align-items: flex-start;
+    cursor: default;
+}
+
+.profile-card:hover {
+    border-color: #e8eaed;
+    box-shadow: none;
+    transform: none;
+}
+
+.profile-pic-container {
+    position: relative;
+    margin-right: 20px;
+}
+
+.profile-pic-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f8f9fa;
+}
+
+.profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.profile-pic-container:hover .profile-overlay {
+    opacity: 1;
+}
+
+.camera-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.camera-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.profile-info p {
+    color: #5f6368;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.avatar-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.avatar-btn {
+    padding: 8px 16px;
+    border: 1px solid #dadce0;
+    background: #fff;
+    color: #5f6368;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.avatar-btn.primary {
+    background: #1a73e8;
+    color: white;
+    border-color: #1a73e8;
+}
+
+.avatar-btn.primary:hover {
+    background: #1669c1;
+    border-color: #1669c1;
+}
+
+.avatar-btn.secondary:hover {
+    background: #f8f9fa;
+    border-color: #5f6368;
+}
+
+.info-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.info-icon.verified {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-content h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 15px;
+    color: #202124;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.info-desc {
+    font-size: 13px;
+    color: #5f6368;
+}
+
+.chevron {
+    color: #5f6368;
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+.verified-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #34a853;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #5f6368;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #1a73e8;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #eee;
+}
+
+.btn-secondary {
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    padding: 8px 16px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1669c1;
+}
+
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-pic-container {
+        margin-right: 0;
+        margin-bottom: 16px;
+    }
+    
+    .info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .chevron {
+        align-self: flex-end;
+        margin-top: -20px;
+    }
+}
+</style>
+
+<script>
+function goBack() {
+    window.history.back();
+}
+
+function uploadAvatar() {
+    document.getElementById('avatarInput').click();
+}
+
+function handleAvatarUpload(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const avatar = e.target.result;
+            
+            // Show image and hide initials
+            const profileImage = document.getElementById('profileImage');
+            const profileInitials = document.getElementById('profileInitials');
+            
+            profileImage.src = avatar;
+            profileImage.style.display = 'block';
+            if (profileInitials) {
+                profileInitials.style.display = 'none';
+            }
+            
+            document.getElementById('removeBtn').style.display = 'inline-block';
+            
+            fetch('/api/update-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Avatar update failed:', data.error);
+                    alert('Failed to update avatar: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating avatar');
+            });
+        };
+        
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeAvatar() {
+    const firstName = '{{ user.firstName if user else "John" }}';
+    const lastName = '{{ user.lastName if user else "Doe" }}';
+    
+    // Hide image and show initials
+    const profileImage = document.getElementById('profileImage');
+    const profileInitials = document.getElementById('profileInitials');
+    
+    profileImage.style.display = 'none';
+    if (profileInitials) {
+        profileInitials.style.display = 'flex';
+        profileInitials.textContent = firstName[0].toUpperCase() + lastName[0].toUpperCase();
+    }
+    
+    document.getElementById('removeBtn').style.display = 'none';
+    
+    // Generate new avatar and update
+    const avatar = generateAvatar(firstName, lastName);
+    
+    fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Avatar removal failed:', data.error);
+            alert('Failed to remove avatar: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error removing avatar');
+    });
+}
+
+function generateAvatar(firstName, lastName) {
+    const initials = `${firstName[0].toUpperCase()}${lastName[0].toUpperCase()}`;
+    const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+    const colorIndex = (firstName.charCodeAt(0) + lastName.charCodeAt(0)) % colors.length;
+    const bgColor = colors[colorIndex];
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 200, 200);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 80px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initials, 100, 100);
+    
+    return canvas.toDataURL();
+}
+
+function editName() {
+    document.getElementById('nameModal').style.display = 'block';
+}
+
+function editBirthday() {
+    document.getElementById('birthdayModal').style.display = 'block';
+}
+
+function editGender() {
+    document.getElementById('genderModal').style.display = 'block';
+}
+
+function editPhone() {
+    const phone = prompt('Enter your phone number:', '{{ user.phone if user and user.phone else "" }}');
+    if (phone !== null) {
+        fetch('/api/update-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Force reload with cache bust
+                window.location.href = window.location.href + '?t=' + Date.now();
+            } else {
+                alert('Error updating phone: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating phone');
+        });
+    }
+}
+
+function editAddress(type) {
+    let currentAddress = '';
+    if (type === 'home') currentAddress = '{{ user.homeAddress if user and user.homeAddress else "" }}';
+    if (type === 'work') currentAddress = '{{ user.workAddress if user and user.workAddress else "" }}';
+    if (type === 'other') currentAddress = '{{ user.otherAddress if user and user.otherAddress else "" }}';
+    
+    const address = prompt(`Enter your ${type} address:`, currentAddress);
+    if (address !== null) {
+        const updateData = {};
+        updateData[type + 'Address'] = address;
+        
+        fetch('/api/update-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Force reload with cache bust
+                window.location.href = window.location.href + '?t=' + Date.now();
+            } else {
+                alert('Error updating address: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating address');
+        });
+    }
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function saveName() {
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    
+    fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal('nameModal');
+            location.reload();
+        } else {
+            alert('Error updating name: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating name');
+    });
+}
+
+function saveBirthday() {
+    const birthday = document.getElementById('birthdayInput').value;
+    
+    if (!birthday) {
+        alert('Please select a birthday');
+        return;
+    }
+    
+    console.log('Saving birthday:', birthday);
+    
+    fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birthday })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Birthday update response:', data);
+        if (data.success) {
+            closeModal('birthdayModal');
+            location.reload();
+        } else {
+            alert('Error updating birthday: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating birthday');
+    });
+}
+
+function saveGender() {
+    const gender = document.getElementById('genderSelect').value;
+    
+    console.log('Saving gender:', gender);
+    
+    fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gender })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Gender update response:', data);
+        if (data.success) {
+            closeModal('genderModal');
+            location.reload();
+        } else {
+            alert('Error updating gender: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating gender');
+    });
+}
+</script>
+{% endblock %}

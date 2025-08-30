@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Account{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <div class="profile-card">
+        {% if user and user.avatar and not user.avatar.startswith('data:image/svg+xml') %}
+            <img src="{{ user.avatar }}" alt="Profile Picture">
+        {% else %}
+            <div class="profile-initials-dashboard" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #2ecc71, #3498db); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: bold; border: 4px solid rgba(255,255,255,0.2);">
+                {{ (user.firstName[0] + user.lastName[0]) if user else 'JD' }}
+            </div>
+        {% endif %}
+        <div class="profile-info">
+            <h2>{{ user.firstName + ' ' + user.lastName if user else 'John Doe' }}</h2>
+            <p>{{ user.email if user else 'johndoe@example.com' }}</p>
+            <div class="profile-badges">
+                <span class="badge verified"><i class="fas fa-check"></i> Verified</span>
+                <span class="badge member-since">Member since {{ user.createdAt[:4] if user and user.createdAt else '2024' }}</span>
+            </div>
+        </div>
+        <button class="manage-account-btn" onclick="window.location.href='/profile'">
+            <i class="fas fa-cog"></i>
+            Manage Account
+        </button>
+    </div>
+</div>
+
+<div class="dashboard-sections">
+    <h3 class="section-title">Account Management</h3>
+    <div class="grid">
+        <div class="card" onclick="window.location.href='/profile'">
+            <div class="card-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="card-content">
+                <h3>Personal Info</h3>
+                <p>Manage your basic information like name, email, and phone number.</p>
+            </div>
+            <span class="chevron">›</span>
+        </div>
+        <div class="card" onclick="window.location.href='/security'">
+            <div class="card-icon security">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Security</h3>
+                <p>Update your password, enable 2-step verification, and secure your account.</p>
+            </div>
+            <span class="chevron">›</span>
+        </div>
+        <div class="card" onclick="window.location.href='/privacy'">
+            <div class="card-icon privacy">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="card-content">
+                <h3>Privacy</h3>
+                <p>Control your data visibility and privacy settings across services.</p>
+            </div>
+            <span class="chevron">›</span>
+        </div>
+        <div class="card" onclick="window.location.href='/devices'">
+            <div class="card-icon devices">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Devices</h3>
+                <p>Review devices where you are signed in and manage access.</p>
+            </div>
+            <span class="chevron">›</span>
+        </div>
+        <div class="card" onclick="window.location.href='/apps'">
+            <div class="card-icon apps">
+                <i class="fas fa-th-large"></i>
+            </div>
+            <div class="card-content">
+                <h3>Apps & Websites</h3>
+                <p>Manage apps and websites connected to your account.</p>
+            </div>
+            <span class="chevron">›</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.welcome-section {
+    margin-bottom: 40px;
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+}
+
+.profile-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 24px;
+    object-fit: cover;
+    border: 4px solid rgba(255,255,255,0.2);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-card h2 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.profile-card p {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-bottom: 16px;
+}
+
+.profile-badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge.verified {
+    background: rgba(52, 168, 83, 0.2);
+}
+
+.manage-account-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.manage-account-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.dashboard-sections {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 24px;
+    color: #202124;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border: 1px solid #f0f0f0;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #1a73e8;
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    background: #e8f0fe;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 20px;
+}
+
+.card-icon.security {
+    background: #e8f5e8;
+    color: #34a853;
+}
+
+.card-icon.privacy {
+    background: #fef7e0;
+    color: #f9ab00;
+}
+
+.card-icon.devices {
+    background: #fce8e6;
+    color: #ea4335;
+}
+
+.card-icon.apps {
+    background: #f3e8ff;
+    color: #9c27b0;
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #202124;
+    font-weight: 600;
+}
+
+.card p {
+    font-size: 14px;
+    color: #5f6368;
+    line-height: 1.5;
+}
+
+.chevron {
+    color: #5f6368;
+    font-size: 20px;
+    transition: all 0.2s ease;
+}
+
+.card {
+    cursor: pointer;
+}
+
+.card:hover .chevron {
+    color: #1a73e8;
+    transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+    }
+
+    .profile-card img {
+        margin-right: 0;
+        margin-bottom: 16px;
+    }
+
+    .manage-account-btn {
+        margin-top: 16px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .chevron {
+        align-self: center;
+        margin-top: 16px;
+    }
+}
+</style>
+{% endblock %}

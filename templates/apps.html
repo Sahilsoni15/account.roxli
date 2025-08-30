@@ -1,0 +1,809 @@
+{% extends "base.html" %}
+
+{% block title %}Apps & websites - Account{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-nav">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <div class="header-content">
+            <h1>Third-party apps with account access</h1>
+            <p>Apps and services you've given access to your Roxli Account</p>
+        </div>
+    </div>
+</div>
+
+<div class="apps-sections">
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-th-large"></i>
+            </div>
+            <div>
+                <h3>Connected apps</h3>
+                <p>Apps that have access to your account data</p>
+            </div>
+        </div>
+        
+        <div class="apps-list" id="appsList">
+            <div class="loading">Loading connected apps...</div>
+        </div>
+        
+        <div class="connect-app-section">
+            <button class="btn-primary" onclick="simulateAppConnection()">
+                <i class="fas fa-plus"></i>
+                Connect a new app
+            </button>
+            <button class="btn-secondary" onclick="clearAllApps()" style="margin-left: 12px;">
+                <i class="fas fa-trash"></i>
+                Clear all apps
+            </button>
+            <p style="font-size: 12px; color: #5f6368; margin-top: 8px;">Simulate connecting apps or clear all to see empty state</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h3>Security recommendations</h3>
+                <p>Keep your account secure</p>
+            </div>
+        </div>
+        
+        <div class="recommendations">
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h4>Review app permissions regularly</h4>
+                    <p>Check which apps have access to your data and remove any you no longer use.</p>
+                </div>
+            </div>
+            
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h4>Only connect trusted apps</h4>
+                    <p>Be careful when granting access to third-party applications and services.</p>
+                </div>
+            </div>
+            
+            <div class="recommendation-card">
+                <div class="recommendation-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="recommendation-content">
+                    <h4>Enable security notifications</h4>
+                    <p>Get notified when new apps request access to your account.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div>
+                <h3>Recent activity</h3>
+                <p>Apps that recently accessed your account</p>
+            </div>
+        </div>
+        
+        <div class="activity-timeline" id="activityTimeline">
+            <div class="loading">Loading recent activity...</div>
+        </div>
+    </div>
+</div>
+
+<!-- App Details Modal -->
+<div class="modal" id="appModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>App details</h3>
+            <button class="close-btn" onclick="closeModal('appModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="appDetails">
+            <!-- App details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('appModal')">Close</button>
+            <button class="btn-danger" onclick="showRemoveAppModal()" id="removeAppBtn">Remove access</button>
+        </div>
+    </div>
+</div>
+
+<!-- Remove App Confirmation Modal -->
+<div class="modal" id="removeAppModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Remove app access</h3>
+            <button class="close-btn" onclick="closeModal('removeAppModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Enter your password to remove access for this app:</p>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="removeAppPassword" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('removeAppModal')">Cancel</button>
+            <button class="btn-danger" onclick="confirmRemoveApp()">Remove access</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    margin-bottom: 30px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.back-btn:hover {
+    background: #e8eaed;
+    color: #202124;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.apps-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1a73e8, #4285f4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.section h3 {
+    font-size: 24px;
+    margin-bottom: 4px;
+    color: #202124;
+}
+
+.section-header p {
+    color: #5f6368;
+    font-size: 16px;
+    margin: 0;
+}
+
+.apps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.app-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.app-item:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+    transform: translateY(-1px);
+}
+
+.app-icon {
+    width: 56px;
+    height: 56px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a73e8;
+    font-size: 24px;
+}
+
+.app-info {
+    flex: 1;
+}
+
+.app-info h4 {
+    font-size: 18px;
+    margin-bottom: 4px;
+    color: #202124;
+}
+
+.app-info p {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 8px;
+}
+
+.app-permissions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.permission-tag {
+    padding: 4px 8px;
+    background: #e8f0fe;
+    color: #1a73e8;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.app-meta {
+    text-align: right;
+    color: #5f6368;
+    font-size: 12px;
+}
+
+.app-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.app-action-btn {
+    padding: 6px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 16px;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: #5f6368;
+    transition: all 0.2s ease;
+}
+
+.app-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #1a73e8;
+    color: #1a73e8;
+}
+
+.app-action-btn.danger {
+    color: #d93025;
+    border-color: #d93025;
+}
+
+.app-action-btn.danger:hover {
+    background: #fce8e6;
+}
+
+.recommendations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.recommendation-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.recommendation-card:hover {
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.1);
+}
+
+.recommendation-icon {
+    width: 40px;
+    height: 40px;
+    background: #e8f5e8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34a853;
+    font-size: 16px;
+}
+
+.recommendation-content h4 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #202124;
+}
+
+.recommendation-content p {
+    font-size: 14px;
+    color: #5f6368;
+    line-height: 1.4;
+}
+
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-left: 3px solid #e0e0e0;
+    margin-left: 20px;
+}
+
+.activity-item.recent {
+    border-left-color: #34a853;
+}
+
+.activity-time {
+    width: 80px;
+    font-size: 12px;
+    color: #5f6368;
+    text-align: right;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content h5 {
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #202124;
+}
+
+.activity-content p {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #5f6368;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-secondary {
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger {
+    padding: 8px 16px;
+    background: #d93025;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #c5221f;
+}
+
+.loading {
+    text-align: center;
+    color: #5f6368;
+    padding: 40px;
+    font-style: italic;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.connect-app-section {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-primary {
+    padding: 12px 24px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #1669c1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+@media (max-width: 768px) {
+    .app-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .app-meta {
+        text-align: center;
+    }
+    
+    .recommendations {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let selectedAppId = null;
+
+function goBack() {
+    window.history.back();
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function showAppDetails(app) {
+    selectedAppId = app.id;
+    const modal = document.getElementById('appModal');
+    const details = document.getElementById('appDetails');
+    const removeBtn = document.getElementById('removeAppBtn');
+    
+    // Hide remove button for non-removable apps
+    if (app.removable === false) {
+        removeBtn.style.display = 'none';
+    } else {
+        removeBtn.style.display = 'inline-block';
+    }
+    
+    details.innerHTML = `
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 80px; height: 80px; background: #f8f9fa; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #1a73e8; font-size: 32px;">
+                <i class="${app.icon || 'fas fa-cube'}"></i>
+            </div>
+            <h3>${app.name}</h3>
+            <p style="color: #5f6368;">${app.description}</p>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+            <h4 style="margin-bottom: 12px;">Permissions</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                ${app.permissions.map(permission => `
+                    <span style="padding: 6px 12px; background: #e8f0fe; color: #1a73e8; border-radius: 16px; font-size: 12px;">
+                        ${permission}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+            <div>
+                <strong>Connected:</strong><br>
+                <span style="color: #5f6368;">${new Date(app.connectedAt || Date.now()).toLocaleDateString()}</span>
+            </div>
+            <div>
+                <strong>Last used:</strong><br>
+                <span style="color: #5f6368;">${new Date(app.lastUsed || Date.now()).toLocaleDateString()}</span>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function showRemoveAppModal() {
+    closeModal('appModal');
+    document.getElementById('removeAppModal').style.display = 'block';
+}
+
+function confirmRemoveApp() {
+    if (!selectedAppId) return;
+    
+    const password = document.getElementById('removeAppPassword').value;
+    if (!password) {
+        alert('Please enter your password');
+        return;
+    }
+    
+    fetch('/api/revoke-app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appId: selectedAppId, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal('removeAppModal');
+            document.getElementById('removeAppPassword').value = '';
+            loadApps();
+            alert('App access removed successfully');
+        } else {
+            alert(data.error || 'Error removing app access');
+        }
+    });
+}
+
+function loadApps() {
+    fetch('/api/connected-apps')
+        .then(response => response.json())
+        .then(data => {
+            const appsList = document.getElementById('appsList');
+            
+            if (data.apps && data.apps.length > 0) {
+                appsList.innerHTML = data.apps.map(app => `
+                    <div class="app-item" onclick="showAppDetails(${JSON.stringify(app).replace(/"/g, '&quot;')})">
+                        <div class="app-icon">
+                            <i class="${app.icon || 'fas fa-cube'}"></i>
+                        </div>
+                        <div class="app-info">
+                            <h4>${app.name}</h4>
+                            <p>${app.description}</p>
+                            <div class="app-permissions">
+                                ${app.permissions.slice(0, 3).map(permission => `
+                                    <span class="permission-tag">${permission}</span>
+                                `).join('')}
+                                ${app.permissions.length > 3 ? `<span class="permission-tag">+${app.permissions.length - 3} more</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="app-meta">
+                            <div>Last used</div>
+                            <div>${new Date(app.lastUsed || Date.now()).toLocaleDateString()}</div>
+                        </div>
+                        <div class="app-actions">
+                            <button class="app-action-btn danger" onclick="event.stopPropagation(); revokeSpecificApp('${app.id}')">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                appsList.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-th-large" style="font-size: 48px; color: #e0e0e0; margin-bottom: 16px;"></i>
+                        <div>No third-party apps connected</div>
+                        <p style="margin-top: 8px; font-size: 14px;">When you sign in to websites and apps with your Roxli Account, they'll appear here</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('appsList').innerHTML = '<div class="loading">Error loading apps</div>';
+        });
+}
+
+function revokeSpecificApp(appId) {
+    if (appId === 'roxli-account') {
+        alert('Cannot remove Roxli Account access');
+        return;
+    }
+    
+    const password = prompt('Enter your password to remove this app:');
+    if (!password) return;
+    
+    fetch('/api/revoke-app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appId, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadApps();
+            alert('App access removed successfully');
+        } else {
+            alert(data.error || 'Error removing app access');
+        }
+    });
+}
+
+function loadActivity() {
+    const activityTimeline = document.getElementById('activityTimeline');
+    
+    // Mock activity data
+    const activities = [
+        { app: 'Roxli Drive', action: 'Accessed files', time: '2 hours ago', recent: true },
+        { app: 'Roxli Photos', action: 'Uploaded photos', time: '1 day ago', recent: false },
+        { app: 'Third-party App', action: 'Read profile info', time: '3 days ago', recent: false }
+    ];
+    
+    if (activities.length > 0) {
+        activityTimeline.innerHTML = activities.map(activity => `
+            <div class="activity-item ${activity.recent ? 'recent' : ''}">
+                <div class="activity-time">${activity.time}</div>
+                <div class="activity-content">
+                    <h5>${activity.app}</h5>
+                    <p>${activity.action}</p>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        activityTimeline.innerHTML = '<div class="loading">No recent activity</div>';
+    }
+}
+
+function simulateAppConnection() {
+    fetch('/api/simulate-app-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`${data.app.name} connected successfully!`);
+            loadApps();
+        } else {
+            alert(data.error || 'Error connecting app');
+        }
+    })
+    .catch(error => {
+        alert('Error connecting app');
+    });
+}
+
+function clearAllApps() {
+    const password = prompt('Enter your password to clear all connected apps:');
+    if (!password) return;
+    
+    fetch('/api/clear-all-apps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('All third-party apps disconnected!');
+            loadApps();
+        } else {
+            alert(data.error || 'Error clearing apps');
+        }
+    })
+    .catch(error => {
+        alert('Error clearing apps');
+    });
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadApps();
+    loadActivity();
+});
+</script>
+{% endblock %}
