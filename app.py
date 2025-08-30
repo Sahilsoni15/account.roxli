@@ -363,10 +363,51 @@ def update_profile():
         user_ref = db.reference(f'users/{user["id"]}')
         user_ref.update(updates)
         
+        # Synchronize avatar across all services if avatar was updated
+        if 'avatar' in updates or 'firstName' in updates or 'lastName' in updates:
+            sync_avatar_across_services(user['id'], updates.get('avatar', user.get('avatar', '')), user['email'])
+        
         return jsonify({'success': True, 'message': 'Profile updated successfully', 'updates': updates})
     except Exception as e:
         print(f"Profile update error: {e}")
         return jsonify({'error': 'Failed to update profile'}), 500
+
+def sync_avatar_across_services(user_id, avatar_url, email):
+    """Synchronize avatar across all Roxli services"""
+    try:
+        # Update in auth service database
+        try:
+            auth_user_ref = db.reference(f'users/{user_id}')
+            auth_user_ref.update({'avatar': avatar_url})
+            print(f"Avatar synced to auth service for user {user_id}")
+        except Exception as e:
+            print(f"Failed to sync avatar to auth service: {e}")
+        
+        # Notify other services about avatar update
+        services = [
+            'https://auth.roxli.in/api/sync-avatar',
+            'https://mail.roxli.in/api/sync-avatar'
+        ]
+        
+        for service_url in services:
+            try:
+                import requests
+                response = requests.post(service_url, 
+                                       json={
+                                           'user_id': user_id,
+                                           'avatar': avatar_url,
+                                           'email': email
+                                       }, 
+                                       timeout=5)
+                if response.status_code == 200:
+                    print(f"Avatar synced to {service_url}")
+                else:
+                    print(f"Failed to sync avatar to {service_url}: {response.status_code}")
+            except Exception as e:
+                print(f"Error syncing avatar to {service_url}: {e}")
+                
+    except Exception as e:
+        print(f"Error in avatar synchronization: {e}")
 
 @app.route('/api/change-password', methods=['POST'])
 @rate_limit(max_requests=3, window=300)
@@ -1249,13 +1290,37 @@ def refresh_avatar():
     
     # Regenerate avatar using ui-avatars.com
     avatar_name = f"{user['firstName']}+{user['lastName']}"
-    new_avatar = f"https://ui-avatars.com/api/?name={avatar_name}&background=random&color=fff&size=200&bold=true"
+    new_avatar = f"https://ui-avatars.com/api/?name={avatar_name}&background=667eea&color=fff&size=200&bold=true"
     
     # Update in Firebase
     user_ref = db.reference(f'users/{user["id"]}')
     user_ref.update({'avatar': new_avatar})
     
+    # Sync across services
+    sync_avatar_across_services(user['id'], new_avatar, user['email'])
+    
     return jsonify({'success': True, 'avatar': new_avatar})
+
+@app.route('/api/sync-avatar', methods=['POST'])
+def sync_avatar():
+    """Endpoint for other services to sync avatar updates"""
+    data = request.json
+    user_id = data.get('user_id')
+    avatar_url = data.get('avatar')
+    email = data.get('email')
+    
+    if not user_id or not avatar_url:
+        return jsonify({'error': 'User ID and avatar URL required'}), 400
+    
+    try:
+        # Update user avatar in local database
+        user_ref = db.reference(f'users/{user_id}')
+        user_ref.update({'avatar': avatar_url})
+        
+        return jsonify({'success': True, 'message': 'Avatar synced successfully'})
+    except Exception as e:
+        print(f"Error syncing avatar: {e}")
+        return jsonify({'error': 'Failed to sync avatar'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5003))
