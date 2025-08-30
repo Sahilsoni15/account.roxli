@@ -598,5 +598,10 @@
     </script>
     <script src="{{ url_for('static', filename='js/auth-bridge.js') }}"></script>
     <script src="{{ url_for('static', filename='js/account.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js');
+        }
+    </script>
 </body>
 </html>

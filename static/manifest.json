@@ -1,15 +1,26 @@
 {
-  "name": "Roxli Account",
+  "name": "Roxli Account Manager",
   "short_name": "Roxli Account",
+  "description": "Manage your Roxli account settings and profile",
   "icons": [
     {
       "src": "/static/images/logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#1a73e8",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "scope": "/",
+  "categories": ["productivity", "utilities"]
 }
